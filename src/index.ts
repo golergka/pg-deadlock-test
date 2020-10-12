@@ -14,18 +14,22 @@ function range(size: number): number[] {
 	return Array.from(Array(size).keys())
 }
 
+const indexes = 20
+const competitors = 600
+
 async function runTest(executor: TaskExecutor) {
 	console.log('Running up migration...')
 	await up(pg)
 	console.log('Up migration done.')
 
+	console.time('test')
+
 	try {
-		const indexes = range(5)
 		const deadlockErrors: DatabaseError[] = []
 		const setAllTo = async (x: number) => {
 			try {
 				await tx(async (db) => {
-					const tasks: Task[] = indexes.map((i) => () =>
+					const tasks: Task[] = range(indexes).map((i) => () =>
 						db.query(
 							`
                                 INSERT INTO test_table (id, value)
@@ -48,11 +52,9 @@ async function runTest(executor: TaskExecutor) {
 			}
 		}
 
-		const competitors = range(100)
-
 		console.log('Running test...')
 
-		await Promise.allSettled(competitors.map(setAllTo))
+		await Promise.allSettled(range(competitors).map(setAllTo))
 
 		if (deadlockErrors.length === 0) {
 			console.log('Test done successfully.')
@@ -79,6 +81,7 @@ async function runTest(executor: TaskExecutor) {
 		console.log('Running down migration...')
 		await down(pg)
 		console.log('Down migration done.')
+		console.timeEnd('test')
 	}
 }
 
@@ -92,9 +95,11 @@ async function runTest(executor: TaskExecutor) {
 		await runTest(executeParallel)
 		console.log('Parallel executor test done.')
 
+		/*
 		console.log('Running test with parallel random executor...')
 		await runTest(executeParallelRandom)
-		console.log('Parallel random executor test done.')
+        console.log('Parallel random executor test done.')
+        */
 
 		process.exit(0) // eslint-disable-line no-process-exit
 	} catch (e) {

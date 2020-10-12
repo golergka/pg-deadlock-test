@@ -8,7 +8,7 @@ if (!POSTGRES_URL) {
 
 export const pg = new Pool({
 	connectionString: POSTGRES_URL,
-	max: 50
+	max: 500
 })
 
 export async function tx<T>(
