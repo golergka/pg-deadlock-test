@@ -10,7 +10,10 @@
         "strictBindCallApply": true,
         "strictPropertyInitialization": true,
         "skipLibCheck": true,
-        "sourceMap": true
+        "sourceMap": true,
+        "lib": [
+            "ES2020"
+        ]
     },
     "include": [
         "src/**/*"
